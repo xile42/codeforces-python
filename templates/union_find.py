@@ -39,7 +39,7 @@ CodeForces题单: (by 灵茶山艾府 https://github.com/EndlessCheng/codeforces
 
     [树+点权/边权的顺序]
     1. https://codeforces.com/problemset/problem/87/D 2300
-    2. 贡献法 https://codeforces.com/problemset/problem/915/F 2400
+    2. https://codeforces.com/problemset/problem/915/F 2400 贡献法
 
     [其他]
     1. https://codeforces.com/problemset/problem/371/D 1800 接水问题
