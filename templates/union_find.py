@@ -7,8 +7,9 @@ from collections import defaultdict
 相关内容: 路径压缩 按秩合并(启发式合并)
 相关链接: 
     1. https://oi-wiki.org/ds/dsu/
+"""
 
-
+"""
 CodeForces题单: (by 灵茶山艾府 https://github.com/EndlessCheng/codeforces-go/tree/master )
 
     [一般]
@@ -55,13 +56,13 @@ CodeForces题单: (by 灵茶山艾府 https://github.com/EndlessCheng/codeforces
     12. https://codeforces.com/contest/1851/problem/G 2000 能力守恒+离线
     13. https://codeforces.com/contest/884/problem/E 2500
     14. https://codeforces.com/problemset/problem/1416/D 2600 DSU 重构树
-
 """
 
 
 """
-#1: 基础并查集
 codeforces-python: 算法竞赛Python3模板库
+#1: 基础并查集
+https://github.com/xile42/codeforces-python/blob/main/templates/union_find.py
 """
 class UnionFind:
 
