@@ -9,11 +9,12 @@ from collections import defaultdict
     1. https://oi-wiki.org/ds/dsu/
 """
 
+
 """
 CodeForces题单: (by 灵茶山艾府 https://github.com/EndlessCheng/codeforces-go/tree/master )
 
     [一般]
-    1. https://codeforces.com/problemset/problem/755/C 1300
+    1. https://codeforces.com/problemset/problem/755/C 1300  [√ Accecpt using #1]
     2. https://codeforces.com/problemset/problem/1167/C 1400
     3. https://codeforces.com/problemset/problem/2060/E 1500
     4. https://codeforces.com/problemset/problem/1209/D 1700
@@ -70,7 +71,7 @@ class UnionFind:
 
         self.root = list(range(n))
         self.size = [1] * n  # 并查集大小/秩
-        self.part = n  # 连通分量数
+        self.count = n  # 连通分量数
 
     # # 递归写法
     # def find(self, x):
@@ -102,7 +103,7 @@ class UnionFind:
         self.root[root_x] = root_y
         self.size[root_y] += self.size[root_x]
         self.size[root_x] = 0
-        self.part -= 1
+        self.count -= 1
 
         return root_y
 
@@ -110,7 +111,7 @@ class UnionFind:
 
         return self.find(x) == self.find(y)
 
-    def get_parts(self):
+    def get_parts(self) -> defaultdict[int, List[int]]:
 
         parts = defaultdict(list)
         n = len(self.root)
@@ -119,7 +120,7 @@ class UnionFind:
 
         return parts
 
-    def get_sizes(self):
+    def get_sizes(self) -> defaultdict[int, int]:
 
         sizes = defaultdict(int)
         n = len(self.root)
