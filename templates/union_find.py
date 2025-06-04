@@ -111,7 +111,7 @@ class UnionFind:
 
         return self.find(x) == self.find(y)
 
-    def get_parts(self) -> defaultdict[int, List[int]]:
+    def get_parts(self) -> DefaultDict[int, List[int]]:
 
         parts = defaultdict(list)
         n = len(self.root)
@@ -120,7 +120,7 @@ class UnionFind:
 
         return parts
 
-    def get_sizes(self) -> defaultdict[int, int]:
+    def get_sizes(self) -> DefaultDict[int, int]:
 
         sizes = defaultdict(int)
         n = len(self.root)
