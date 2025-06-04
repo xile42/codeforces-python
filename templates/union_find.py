@@ -4,8 +4,15 @@ from collections import defaultdict
 
 """
 [并查集(UnionFind)]
-相关内容: 路径压缩 按秩合并(启发式合并)
-相关链接: 
+默认具有路径压缩与按秩合并(启发式合并)优化
+
+[时间复杂度]
+    find: O(α(N))  # 其中α(N)为反阿克曼函数, 近似常数
+    merge: O(α(N))  # 其中α(N)为反阿克曼函数, 近似常数
+[空间复杂度]
+    O(N)
+
+[相关链接]
     1. https://oi-wiki.org/ds/dsu/
 """
 
