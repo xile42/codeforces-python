@@ -151,7 +151,7 @@ class HashUnionFind:
         self.count = 0  # 连通分量数
 
     # # 递归写法
-    # def find(self, x):
+    # def find(self, x: Hashable) -> Hashable:
     #
     #     if x not in self.root:
     #         self.root[x] = x
@@ -165,7 +165,7 @@ class HashUnionFind:
     #     return self.root[x]
 
     # 非递归写法, 效率更优
-    def find(self, x: int) -> int:
+    def find(self, x: Hashable) -> Hashable:
 
         if x not in self.root:
             self.root[x] = x
@@ -181,7 +181,7 @@ class HashUnionFind:
 
         return root
 
-    def merge(self, x: int, y: int) -> Optional[int]:
+    def merge(self, x: Hashable, y: Hashable) -> Optional[Hashable]:
 
         root_x, root_y = self.find(x), self.find(y)
         if root_x == root_y:
@@ -196,11 +196,11 @@ class HashUnionFind:
 
         return root_y
 
-    def is_merged(self, x: int, y: int) -> bool:
+    def is_merged(self, x: Hashable, y: Hashable) -> bool:
 
         return self.find(x) == self.find(y)
 
-    def get_parts(self) -> DefaultDict[int, List[int]]:
+    def get_parts(self) -> DefaultDict[Hashable, List[Hashable]]:
 
         parts = defaultdict(list)
         for key in self.root:
@@ -208,7 +208,7 @@ class HashUnionFind:
 
         return parts
 
-    def get_sizes(self) -> DefaultDict[int, int]:
+    def get_sizes(self) -> DefaultDict[Hashable, int]:
 
         sizes = defaultdict(int)
         for key in self.root:
