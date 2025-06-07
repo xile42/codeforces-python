@@ -1,4 +1,5 @@
 from typing import *
+from sortedcontainers import SortedList
 
 
 """
@@ -41,23 +42,24 @@ https://github.com/xile42/codeforces-python/blob/main/templates/trie.py
 """
 class TrieNode:
 
-    __slots__ = ("son", "cnt", "sum", "val")
+    __slots__ = ("son", "cnt", "sum", "val", "sorted_list")
 
     def __init__(self) -> None:
         self.son: Dict[Hashable, TrieNode] = dict()  # 子节点
         self.cnt: int = 0  # 当前节点对应的完整字符串的个数(以当前节点为结尾的完整字符串个数)
         self.sum: int = 0  # 子树 cnt 之和(有多少个完整字符串，包含以当前节点为起点的后缀字符串; 特别的，root的sum值相当于Trie中的字符串数量)
         self.val: int = 0  # 根据需要额外存储的信息
+        self.sorted_list: SortedList = SortedList()  # 所有经过该节点的字符串 s 的排序
 
     def empty(self) -> bool:
-
         return len(self.son) == 0  # 是否叶子节点
 
 
 class Trie:
 
-    def __init__(self) -> None:
+    def __init__(self, need_sorted_list: bool = False) -> None:
         self.root = TrieNode()
+        self.need_sorted_list = need_sorted_list
 
     _OFFSET = ord("a")
 
@@ -78,6 +80,8 @@ class Trie:
             if idx not in node.son:
                 node.son[idx] = TrieNode()
             node = node.son[idx]
+            if self.need_sorted_list:
+                node.sorted_list.add(s)
         node.cnt += 1  # o 对应的完整字符串的个数
         node.val = val
 
