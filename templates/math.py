@@ -18,7 +18,7 @@ from typing import *
 
 """
 codeforces-python: 算法竞赛Python3模板库
-#1: 基础埃氏筛
+#1: 埃氏筛
 https://github.com/xile42/codeforces-python/blob/main/templates/math.py
 """
 class EratosthenesSieve:
