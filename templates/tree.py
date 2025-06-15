@@ -43,7 +43,7 @@ class LCABinaryLifting:
 
         g = [[] for _ in range(n)]
         for edge in edges:
-            x, y, w = edge if len(edge) == 3 else x, y, 1
+            x, y, w = edge if len(edge) == 3 else (x, y, 1)
             g[x].append([y, w])
             g[y].append([x, w])
 
