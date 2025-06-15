@@ -97,11 +97,12 @@ class LCABinaryLifting:
 
         return self.dist[x] + self.dist[y] - 2 * self.dist[self.lca(x, y)]
 
-    def upto_dis(self, x: int, d: int) -> int:
+    def up_dis(self, x: int, d: int) -> int:  # 上跳至多距离d
 
         dx = self.dist[x]
         for i in range(self.m - 1, -1, -1):
             p = self.parent[x][i]
             if p != -1 and dx - self.dist[p] <= d:
                 x = p
+
         return x
