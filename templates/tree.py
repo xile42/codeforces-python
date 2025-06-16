@@ -29,7 +29,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/tree.py
 """
 class LCABinaryLifting:
 
-    def __init__(self, edges: List[List[int]]) -> None:
+    def __init__(self, edges: List[List[int]], root_value: int=0) -> None:
 
         """
         注意:
@@ -44,7 +44,7 @@ class LCABinaryLifting:
 
         g = [[] for _ in range(n)]
         for edge in edges:
-            x, y, w = edge if len(edge) == 3 else (x, y, 1)
+            x, y, w = edge if len(edge) == 3 else (edge[0], edge[1], 1)  # 忽略越界检查
             g[x].append([y, w])
             g[y].append([x, w])
 
@@ -61,7 +61,7 @@ class LCABinaryLifting:
                     self.dist[y] = self.dist[x] + w
                     dfs(y, x)
 
-        dfs(0, -1)  # 假设根节点是0
+        dfs(root_value, -1)  # 假设根节点是0
 
         for i in range(self.m - 1):
             for x in range(n):
@@ -94,9 +94,13 @@ class LCABinaryLifting:
 
         return self.parent[x][0]
 
-    def get_dis(self, x: int, y: int) -> int:
+    def dist_weighted(self, x: int, y: int) -> int:
 
         return self.dist[x] + self.dist[y] - 2 * self.dist[self.lca(x, y)]
+
+    def dist_none_weighted(self, x: int, y: int) -> int:
+
+        return self.depth[x] + self.depth[y] - 2 * self.depth[self.lca(x, y)]
 
     def up_dis(self, x: int, d: int) -> int:  # 上跳至多距离d
 
