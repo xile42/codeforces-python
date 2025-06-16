@@ -10,7 +10,7 @@ from typing import *
     2. 也可通过need_lpf=True, 预处理每个数的最小质因数, 以O(logN)质因数分解, 空间复杂度更低
 
 [时间复杂度]
-    sieve: O(NloglogN)  # 近似线性, 常数小
+    initialize: O(NloglogN)  # 近似线性, 常数小
     factorize with lpf: O(logN)  # 每个数仅存储lpf, 空间复杂度更优
 [空间复杂度]
     sieve: O(N)
@@ -85,7 +85,7 @@ class EratosthenesSieve:
     2. 也可通过need_lpf=True, 预处理每个数的最小质因数, 以O(logN)质因数分解, 空间复杂度更低
 
 [时间复杂度]
-    sieve: O(N)  # 严格线性
+    initialize: O(N)  # 严格线性
     factorize with lpf: O(logN)  # 每个数仅存储lpf, 空间复杂度更优
 [空间复杂度]
     sieve: O(N)
