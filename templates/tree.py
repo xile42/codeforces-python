@@ -36,6 +36,7 @@ class LCABinaryLifting:
             1. edges: 默认顺序为 [u, v, (w)]
             2. edges: 默认节点编号为 0 ~ n - 1
             3. 根节点: 默认为 0
+            4. 深度: 默认从0开始
         """
 
         n = len(edges) + 1
