@@ -233,52 +233,114 @@ class Factorial:
         return self.f[n - 1] * self.g[n] % self.mod
 
 
-# 扩展欧几里得
-# g, x, y = exgcd(a, b)
-# g = gcd(a, b)
-# x, y 为 x * a + y * b = gcd(a, b) 的一个解
-# 若 b ≠ 0, 则 |x| <= b, |y| <= a
-def exgcd(a: int, b: int) -> tuple[int, int, int]:
+"""
+[扩展欧几里得算法(Extended Euclidean Algorithm)]
+用于求解贝祖等式: a * x + b * y = gcd(a,b), 同时可以用于求解模逆元
+g, x, y = exgcd(a, b)
+其中:
+    g = gcd(a, b)
+    x, y 为 x * a + y * b = gcd(a, b) 的一个解
+若 b ≠ 0, 则 |x| <= b, |y| <= a
 
-    if b == 0:
-        return a, 1, 0
-    g, x, y = exgcd(b, a % b)
+[时间复杂度]
+    O(log min(a,b))  # 与欧几里得算法相同
 
-    return g, y, x - (a // b) * y
-
-
-# 中国剩余定理
-# 求解一元线性同余方程组, 其中a1, a2, ..., ak两两互质
-#   { x ≡ r1 (mod a1)
-#   { x ≡ r2 (mod a2)
-#   ...
-#   { x ≡ rk (mod ak)
-def CRT(k: int, a: List[int], r: List[int]) -> int:
-
-    ans = 0
-    n = reduce(mul, a)
-    for i in range(k):
-        m = n // a[i]
-        g, b, y = exgcd(m, a[i])
-        assert g == 1, "模数不互质, 无法使用中国剩余定理"
-        ans = (ans + r[i] * m * b % n) % n
-
-    return (ans % n + n) % n
+[相关链接]
+    1. https://oi-wiki.org/math/number-theory/gcd/
+    2. https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+"""
 
 
-# 逆元求解
-# a * x ≡ 1 (mod m)
-# 逆元存在的条件: gcd(a, m) = 1 (a, m互质)
-# 扩展欧几里得可以找到x, y满足:
-#     a * x + b * y = gcd(a, b)
-# 代入a, m得:
-#     a * x + m * y = gcd(a, m)
-# gcd(a, m) = 1, 且两边取模m:
-#     a * x ≡ 1 (mod m)
-# 即系数x即为a在模m下的逆元, 其中x可能为负数,需加m到正数
-def mod_inverse(a: int, m: int) -> int:  # 求解a在模m下的逆元
+"""
+codeforces-python: 算法竞赛Python3模板库
+#4: 扩展欧几里得算法
+https://github.com/xile42/codeforces-python/blob/main/templates/math.py
+"""
+class ExGCD:
 
-    g, x, y = exgcd(a, m)
-    assert g == 1, "逆元不存在, a, m不互质"
+    @staticmethod
+    def run(a: int, b: int) -> Tuple[int, int, int]:
 
-    return x % m  # 调整 x 的范围到 [0, m-1], python负数取模自动加到正数
+        if b == 0:
+            return a, 1, 0
+
+        g, x, y = ExGCD.run(b, a % b)
+
+        return g, y, x - (a // b) * y
+
+
+"""
+[中国剩余定理(Chinese Remainder Theorem)]
+用于求解一元线性同余方程组，要求模数两两互质
+求解一元线性同余方程组, 其中a1, a2, ..., ak两两互质
+    { x ≡ r1 (mod a1)
+    { x ≡ r2 (mod a2)
+    ...
+    { x ≡ rk (mod ak)
+
+[时间复杂度]
+    O(klogM)  # k是方程数量，M是模数的乘积
+
+[相关链接]
+    1. https://oi-wiki.org/math/number-theory/crt/
+    2. https://en.wikipedia.org/wiki/Chinese_remainder_theorem
+"""
+
+
+"""
+codeforces-python: 算法竞赛Python3模板库
+#5: 中国剩余定理
+https://github.com/xile42/codeforces-python/blob/main/templates/math.py
+"""
+class CRT:
+
+    @staticmethod
+    def run(k: int, a: List[int], r: List[int]) -> int:
+
+        ans = 0
+        n = reduce(mul, a)
+        for i in range(k):
+            m = n // a[i]
+            g, b, y = ExGCD.run(m, a[i])
+            assert g == 1, "模数不互质, 无法使用中国剩余定理"
+            ans = (ans + r[i] * m * b % n) % n
+
+        return (ans % n + n) % n
+
+
+"""
+[模逆元求解(Modular Multiplicative Inverse)]
+用于求解 a 在模 m 下的乘法逆元
+a * x ≡ 1 (mod m)
+逆元存在的条件: gcd(a, m) = 1 (a, m互质)
+扩展欧几里得可以找到x, y满足:
+    a * x + b * y = gcd(a, b)
+代入a, m得:
+    a * x + m * y = gcd(a, m)
+gcd(a, m) = 1, 且两边取模m:
+    a * x ≡ 1 (mod m)
+即系数x即为a在模m下的逆元, 其中x可能为负数,需加m到正数
+
+[时间复杂度]
+    O(log a)  # 使用扩展欧几里得算法
+
+[相关链接]
+    1. https://oi-wiki.org/math/number-theory/inverse/
+    2. https://en.wikipedia.org/wiki/Modular_multiplicative_inverse
+"""
+
+
+"""
+codeforces-python: 算法竞赛Python3模板库
+#6: 模逆元求解
+https://github.com/xile42/codeforces-python/blob/main/templates/math.py
+"""
+class ModInverse:
+
+    @staticmethod
+    def run(a: int, m: int) -> int:
+
+        g, x, y = ExGCD.run(a, m)
+        assert g == 1, "逆元不存在, a, m不互质"
+
+        return x % m
