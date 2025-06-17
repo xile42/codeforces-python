@@ -1,4 +1,6 @@
 from typing import *
+from operator import *
+from functools import reduce
 
 
 """
@@ -161,3 +163,122 @@ class EulerSieve:
             x //= lpf
 
         return factors
+
+
+"""
+[阶乘与组合数预处理(Factorial, Combination, Permutation, Catalan...)]
+用于快速计算阶乘、阶乘逆元、组合数、排列数、卡特兰数等，支持取模
+
+[时间复杂度]
+    initialize: O(N)  # 近似线性, 常数小
+    query: O(1)  # 每个数仅存储lpf, 空间复杂度更优
+[空间复杂度]
+    initialize: O(N)
+
+[相关链接]
+    1. https://oi-wiki.org/math/combinatorics/basic/
+    2. https://en.wikipedia.org/wiki/Factorial
+"""
+
+
+"""
+codeforces-python: 算法竞赛Python3模板库
+#3: 阶乘与组合数预处理
+https://github.com/xile42/codeforces-python/blob/main/templates/math.py
+"""
+class Factorial:
+
+    def __init__(self, n: int=100_000, mod: int=1_000_000_007) -> None:
+
+        n += 1
+        self.mod = mod
+        self.f = [1] * n  # 阶乘
+        self.g = [1] * n  # 阶乘逆元
+
+        for i in range(1, n):
+            self.f[i] = self.f[i - 1] * i % self.mod
+
+        self.g[-1] = pow(self.f[-1], mod - 2, mod)
+        for i in range(n - 2, -1, -1):
+            self.g[i] = self.g[i + 1] * (i + 1) % self.mod
+
+    def factorial(self, n: int) -> int:  # 阶乘
+
+        return self.f[n]
+
+    def factorial_inverse(self, n: int) -> int:  # 逆元
+
+        return self.g[n]
+
+    def comb(self, n: int, m: int) -> int:  # 带模组合数 C(n, m)
+
+        if n < m or m < 0 or n < 0:  # 不合法情况
+            return 0
+
+        return self.f[n] * self.g[m] % self.mod * self.g[n - m] % self.mod
+
+    def perm(self, n: int, m: int) -> int:  # 带模全排列 A(n, m)
+
+        if n < m or m < 0 or n < 0:
+            return 0
+
+        return self.f[n] * self.g[n - m] % self.mod
+
+    def catalan(self, n: int) -> int:  # 卡特兰数
+
+        return (self.comb(2 * n, n) - self.comb(2 * n, n - 1)) % self.mod
+
+    def inv(self, n: int) -> int:  # n的逆元 n ^ (-1)
+
+        return self.f[n - 1] * self.g[n] % self.mod
+
+
+# 扩展欧几里得
+# g, x, y = exgcd(a, b)
+# g = gcd(a, b)
+# x, y 为 x * a + y * b = gcd(a, b) 的一个解
+# 若 b ≠ 0, 则 |x| <= b, |y| <= a
+def exgcd(a: int, b: int) -> tuple[int, int, int]:
+
+    if b == 0:
+        return a, 1, 0
+    g, x, y = exgcd(b, a % b)
+
+    return g, y, x - (a // b) * y
+
+
+# 中国剩余定理
+# 求解一元线性同余方程组, 其中a1, a2, ..., ak两两互质
+#   { x ≡ r1 (mod a1)
+#   { x ≡ r2 (mod a2)
+#   ...
+#   { x ≡ rk (mod ak)
+def CRT(k: int, a: List[int], r: List[int]) -> int:
+
+    ans = 0
+    n = reduce(mul, a)
+    for i in range(k):
+        m = n // a[i]
+        g, b, y = exgcd(m, a[i])
+        assert g == 1, "模数不互质, 无法使用中国剩余定理"
+        ans = (ans + r[i] * m * b % n) % n
+
+    return (ans % n + n) % n
+
+
+# 逆元求解
+# a * x ≡ 1 (mod m)
+# 逆元存在的条件: gcd(a, m) = 1 (a, m互质)
+# 扩展欧几里得可以找到x, y满足:
+#     a * x + b * y = gcd(a, b)
+# 代入a, m得:
+#     a * x + m * y = gcd(a, m)
+# gcd(a, m) = 1, 且两边取模m:
+#     a * x ≡ 1 (mod m)
+# 即系数x即为a在模m下的逆元, 其中x可能为负数,需加m到正数
+def mod_inverse(a: int, m: int) -> int:  # 求解a在模m下的逆元
+
+    g, x, y = exgcd(a, m)
+    assert g == 1, "逆元不存在, a, m不互质"
+
+    return x % m  # 调整 x 的范围到 [0, m-1], python负数取模自动加到正数
