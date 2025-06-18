@@ -322,7 +322,7 @@ gcd(a, m) = 1, 且两边取模m:
 即系数x即为a在模m下的逆元, 其中x可能为负数,需加m到正数
 
 [时间复杂度]
-    O(log a)  # 使用扩展欧几里得算法
+    O(log N)  # 使用扩展欧几里得算法
 
 [相关链接]
     1. https://oi-wiki.org/math/number-theory/inverse/
