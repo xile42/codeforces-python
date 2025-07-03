@@ -100,7 +100,6 @@ class Trie:
 
     def remove(self, s: str) -> Optional[TrieNode]:
         """删除字符串 s，返回字符串末尾对应的节点"""
-
         # 检查 s 是否在 trie 中
         node = self.root
         for c in s:
