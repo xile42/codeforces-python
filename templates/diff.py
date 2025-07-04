@@ -137,6 +137,24 @@ class DiffArray:
 
         return ans
 
+    @staticmethod
+    def diff_accumulate(lrws: List[Tuple[int, int, int]]) -> List[int]:
+        """更新所有操作后, 返回所有点的值"""
+        diff = defaultdict(int)
+        for l, r, w in lrws:
+            diff[l] += w
+            diff[r + 1] -= w  # 对于两个区间重合端点, 如(l, x)和(x, r), 若二者同时生效, 这里为r + 1, 否则(如人立刻下车)为r
+
+        xs = sorted(diff.keys())
+        prefix = list()
+        cur = 0
+        for x in xs:
+            cur += diff[x]
+            prefix.append(cur)
+
+        return prefix[:-1]
+
+
 # TODO
     # @staticmethod
     # def diff_of_diff(n: int) -> Tuple[
