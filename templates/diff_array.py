@@ -39,7 +39,7 @@ from collections import defaultdict
 """
 codeforces-python: 算法竞赛Python3模板库
 #1: 一维差分(数组实现)
-https://github.com/xile42/codeforces-python/blob/main/templates/diff.py
+https://github.com/xile42/codeforces-python/blob/main/templates/diff_array.py
 """
 class DiffArray:
 
@@ -64,13 +64,14 @@ class DiffArray:
 """
 codeforces-python: 算法竞赛Python3模板库
 #2: 一维差分(哈希表实现)
-https://github.com/xile42/codeforces-python/blob/main/templates/diff.py
+https://github.com/xile42/codeforces-python/blob/main/templates/diff_array.py
 """
 class DiffArray:
 
     @staticmethod
     def valid_points_count(lrws: List[Tuple[int, int, int]], check: Callable[[int], bool]=lambda x: x > 0) -> int:
-        """计算区间[l, r], 全部更新后, 值满足check的整点数"""
+        """ 计算区间[l, r], 全部更新后, 值满足check的整点数 """
+
         diff = defaultdict(int)
         for l, r, w in lrws:
             diff[l] += w
@@ -87,7 +88,8 @@ class DiffArray:
 
     @staticmethod
     def covered_points_count(lrs: List[Tuple[int, int]]) -> int:
-        """计算区间[l, r], 全部更新后, 至少被一个区间覆盖的整点数"""
+        """ 计算区间[l, r], 全部更新后, 至少被一个区间覆盖的整点数 """
+
         diff = defaultdict(int)
         for l, r in lrs:
             diff[l] += 1
@@ -104,7 +106,8 @@ class DiffArray:
 
     @staticmethod
     def max_covered_times(lrs: List[Tuple[int, int]]) -> int:
-        """计算区间[l, r], 全部更新后, 整点最大重叠层数"""
+        """ 计算区间[l, r], 全部更新后, 整点最大重叠层数 """
+
         diff = defaultdict(int)
         for l, r in lrs:
             diff[l] += 1
@@ -121,7 +124,8 @@ class DiffArray:
 
     @staticmethod
     def merge_intervals(lrs: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-        """合并区间"""
+        """ 合并区间 """
+
         diff = defaultdict(int)
         for l, r in lrs:
             diff[l] += 1
@@ -142,7 +146,8 @@ class DiffArray:
 
     @staticmethod
     def batch_query(lrws: List[Tuple[int, int, int]], queries: List[int]) -> List[int]:
-        """更新所有操作后, 批量查询对应点的值"""
+        """ 更新所有操作后, 批量查询对应点的值 """
+
         diff = defaultdict(int)
         for l, r, w in lrws:
             diff[l] += w
@@ -163,12 +168,13 @@ class DiffArray:
         return ans
 
     @staticmethod
-    def diff_accumulate(lrws: List[Tuple[int, int, int]]) -> List[int]:
-        """更新所有操作后, 返回所有点的值"""
+    def diff_accumulate(lrws: List[Tuple[int, int, int]]) -> Tuple[List[int], List[int]]:
+        """ 更新所有操作后, 返回所有点的值 """
+
         diff = defaultdict(int)
         for l, r, w in lrws:
             diff[l] += w
-            diff[r + 1] -= w  # 对于两个区间重合端点, 如(l, x)和(x, r), 若二者同时生效, 这里为r + 1, 否则(如人立刻下车)为r
+            diff[r + 1] -= w  # 对于两个区间重合端点, 如(l, x)和(x, r), 若二者同时生效, 这里为r + 1, 否则(如人立刻下车)为r(建议传入时r=r-1)
 
         xs = sorted(diff.keys())
         prefix = list()
