@@ -38,7 +38,32 @@ from collections import defaultdict
 
 """
 codeforces-python: 算法竞赛Python3模板库
-#1: 一维差分(哈希表实现)
+#1: 一维差分(数组实现)
+https://github.com/xile42/codeforces-python/blob/main/templates/diff.py
+"""
+class DiffArray:
+
+    @staticmethod
+    def diff_accumulate(n: int, lrws: List[Tuple[int, int, int]]) -> List[int]:
+
+        diff = [0] * (n + 1)  # 默认下标从0开始(对应l, r)
+
+        for l, r, w in lrws:
+            diff[l] += w
+            diff[r + 1] -= w
+
+        ans = list()
+        cur = 0
+        for i in range(n):
+            cur += diff[i]
+            ans.append(cur)
+
+        return ans  # 默认返回长度n
+
+
+"""
+codeforces-python: 算法竞赛Python3模板库
+#2: 一维差分(哈希表实现)
 https://github.com/xile42/codeforces-python/blob/main/templates/diff.py
 """
 class DiffArray:
@@ -152,7 +177,7 @@ class DiffArray:
             cur += diff[x]
             prefix.append(cur)
 
-        return prefix[:-1]
+        return xs, prefix
 
 
 # TODO
