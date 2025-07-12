@@ -31,7 +31,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/sparse_table.py
 """
 class SparseTable:
 
-    def __init__(self, arr: List[int]) -> None:
+    def __init__(self, arr: List[Union[int, Tuple[int, int]]]) -> None:
 
         n = len(arr)
         size = n.bit_length()
@@ -131,3 +131,24 @@ class ProductSparseTable(SparseTable):
     def op(self, a: int, b: int) -> int:
 
         return (a * b) % self.mod if self.mod is not None else (a * b)
+
+
+"""
+codeforces-python: 算法竞赛Python3模板库
+#8: 稀疏表-带下标版本
+https://github.com/xile42/codeforces-python/blob/main/templates/sparse_table.py
+"""
+class IndexedSparseTable(SparseTable):
+
+    def __init__(self, arr: List[int], op: Optional[Callable] = None):
+        self.arr = arr.copy()
+        super().__init__(list(zip(arr, range(len(arr)))))
+
+    @staticmethod
+    def _default_op(a: Tuple[int, int], b: Tuple[int, int]) -> Tuple[int, int]:
+
+        return a if a[0] < b[0] or (a[0] == b[0] and a[1] < b[1]) else b
+
+    def op(self, a: Tuple[int, int], b: Tuple[int, int]) -> Tuple[int, int]:
+
+        return self._default_op(a, b) if self.op is None else self.op(a, b)
