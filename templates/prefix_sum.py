@@ -64,7 +64,7 @@ from collections import defaultdict
 
 [算法特性]
     1. 前缀和数组通常从1开始索引, 避免边界检查
-    2. 区间查询遵循左闭右开原则 [l,r), 即prefix_sum[r] - prefix_sum[l]
+    2. 区间查询默认左闭右闭原则 [l,r], 即prefix_sum[r + 1] - prefix_sum[l]
     3. 二维前缀和使用容斥原理计算矩形区域和
     4. 斜向前缀和适用于菱形区域查询
     5. 贡献和计算利用排序后每个元素的相对位置关系
