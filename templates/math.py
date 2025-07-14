@@ -145,8 +145,6 @@ class EulerSieve:
                         self.lpf[i * p] = p  # 最小质因子
 
                 if i % p == 0:  # 保证每个合数只被最小质因数筛一次
-                    if need_factors and i != p:  # 如果i是p的倍数且不是p本身，需要修正质因数列表
-                        self.factors[i * p] = self.factors[i].copy()
                     break
 
     def factorize(self, x: int) -> Dict[int, int]:
@@ -344,3 +342,32 @@ class ModInverse:
         assert g == 1, "逆元不存在, a, m不互质"
 
         return x % m
+
+
+"""
+[n!质因数p频数]
+n!中, 某一质因数p的频数 = 
+    ⌊n/p⌋ + ⌊n/(p^2)⌋ + ... + ⌊n/(p^k)⌋    ( 设 p^k <= n <= p^(k+1) )
+进一步地, 由上式可知, 对于相同的n, p越大, 则频数越小
+
+[时间复杂度]
+    O(log N)
+"""
+
+
+"""
+codeforces-python: 算法竞赛Python3模板库
+#7: n!质因数p频数
+https://github.com/xile42/codeforces-python/blob/main/templates/math.py
+"""
+class NFactorialPrimeFactorCount:
+
+    @staticmethod
+    def run(n: int, p: int) -> int:
+
+        ans = 0
+        while n:
+            n //= p
+            ans += n
+
+        return ans

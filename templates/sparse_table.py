@@ -141,7 +141,9 @@ https://github.com/xile42/codeforces-python/blob/main/templates/sparse_table.py
 class IndexedSparseTable(SparseTable):
 
     def __init__(self, arr: List[int], op: Optional[Callable] = None):
+
         self.arr = arr.copy()
+        self.op = op
         super().__init__(list(zip(arr, range(len(arr)))))
 
     @staticmethod
