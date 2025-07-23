@@ -24,6 +24,10 @@ CodeForces Union Find 题单:
     - 往往需要做辅助 offset, 如对于一个点 i (x, y), 可以合并点 i 与 N + x, N + offset + y, 其中 N 为点数, offset 为一个常数偏移量
     1. https://codeforces.com/problemset/problem/217/A 1200  [√ Accecpt using template #2]
 
+    [数组并查集]
+    - 将数组下标作为并查集的节点, 通过合并相邻的元素(一般左合并到右)来实现一些操作
+    1. https://codeforces.com/problemset/problem/1927/D 1300  [√ Accecpt using template #3]
+
     [质因子并查集]
     - 预处理质因子(见 math.go 中的 primeDivisorsAll)
     - 枚举 a[i] 的质因子 p, 用 pre[p] 记录质因子上一次出现的下标(初始化成 -1), 然后 merge(i, pre[p]) if pre[p] > 0
