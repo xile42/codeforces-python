@@ -69,7 +69,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/diff_array.py
 class DiffArray:
 
     @staticmethod
-    def valid_points_count(lrws: List[Tuple[int, int, int]], check: Callable[[int], bool]=lambda x: x > 0) -> int:
+    def valid_points_count(lrws: List[Tuple[int, int, int]], check: Callable[[int], bool] = lambda x: x > 0) -> int:
         """ 计算区间[l, r], 全部更新后, 值满足check的整点数 """
 
         diff = defaultdict(int)

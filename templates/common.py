@@ -10,7 +10,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/common.py
 """
 class PalindromeNumberGenerator:
 
-    def __init__(self, mx: int=10 ** 9) -> None:
+    def __init__(self, mx: int = 10 ** 9) -> None:
 
         self.mx = mx
         self.pal = list()

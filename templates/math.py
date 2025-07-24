@@ -30,7 +30,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/math.py
 """
 class EratosthenesSieve:
 
-    def __init__(self, mx: int=10 ** 5 + 2, need_factors: bool=False, need_lpf: bool=False) -> None:
+    def __init__(self, mx: int = 10 ** 5 + 2, need_factors: bool = False, need_lpf: bool = False) -> None:
 
         self.is_prime = [True] * mx
         self.is_prime[0] = self.is_prime[1] = False  # 忽略了越界检查
@@ -105,7 +105,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/math.py
 """
 class EulerSieve:
 
-    def __init__(self, mx: int=10 ** 5 + 2, need_factors: bool=False, need_lpf: bool=False) -> None:
+    def __init__(self, mx: int = 10 ** 5 + 2, need_factors: bool = False, need_lpf: bool = False) -> None:
 
         self.is_prime = [True] * mx
         self.is_prime[0] = self.is_prime[1] = False  # 忽略了越界检查
@@ -186,7 +186,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/math.py
 """
 class Factorial:
 
-    def __init__(self, n: int=100_000, mod: int=1_000_000_007) -> None:
+    def __init__(self, n: int = 100_000, mod: int = 1_000_000_007) -> None:
 
         n += 1
         self.mod = mod

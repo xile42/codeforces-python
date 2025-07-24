@@ -103,7 +103,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/graph.py
 """
 class Dijkstra:
 
-    def __init__(self, n: int, edges: List[List[int]], start: int, directed: bool = True) -> None:
+    def __init__(self, n: int, edges: List[List[int]], start: int, directed: bool = False, need_path: bool = False) -> None:
 
         self.n = n
         self.g = [[] for _ in range(n)]
@@ -114,7 +114,9 @@ class Dijkstra:
 
         self.start = start
         self.directed = directed
+        self.need_path = need_path
         self.dis = [inf] * self.n
+        self.pre = [-1] * self.n if need_path else None
         self._run()
 
     def _run(self) -> None:
@@ -132,6 +134,8 @@ class Dijkstra:
                 if new_dis_y < self.dis[y]:
                     self.dis[y] = new_dis_y
                     heappush(heap, (new_dis_y, y))
+                    if self.need_path:
+                        self.pre[y] = x
 
     def get_dis(self) -> List[float]:
         """ 获取起点到所有节点的最短距离列表 """
@@ -144,9 +148,21 @@ class Dijkstra:
         return self.dis[target]
 
     def get_path(self, target: int) -> Optional[List[int]]:
-        """获取起点到目标节点的最短路径(需要额外预处理)"""
-        # 注意：原始Dijkstra实现不记录路径，需要添加前驱节点记录
-        raise NotImplementedError("需要添加前驱节点记录以实现此功能")
+        """ 获取起点到目标节点的最短路径 """
+
+        if not self.need_path:
+            raise ValueError("Path recording was not enabled. Set need_path=True in constructor.")
+
+        if self.dis[target] == inf:
+            return None
+
+        path = list()
+        while target != -1:
+            path.append(target)
+            target = self.pre[target]
+        path.reverse()
+
+        return path
 
     def get_reachable_nodes(self) -> List[int]:
         """ 获取所有可达节点的列表 """

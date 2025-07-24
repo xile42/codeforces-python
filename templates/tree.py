@@ -29,7 +29,7 @@ https://github.com/xile42/codeforces-python/blob/main/templates/tree.py
 """
 class LCABinaryLifting:
 
-    def __init__(self, edges: List[List[int]], root_value: int=0) -> None:
+    def __init__(self, edges: List[List[int]], root_value: int = 0) -> None:
 
         """
         注意:
