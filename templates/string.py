@@ -107,11 +107,14 @@ class StringHashDoubleMod:
 
 """
 [KMP算法(Knuth-Morris-Pratt Algorithm)]
-字符串匹配算法，基于前缀函数
+字符串匹配算法
+定义: π[i] 表示模式串 P[0..i] 的最长公共真前后缀长度
+  - 真前缀：不包含末尾字符的子串 (如 "abc"的真前缀有 "a", "ab", 即不能取到最后一个元素)
+  - 真后缀：不包含首字符的子串 (如 "abc"的真后缀有 "c", "bc", 即不能取到最后一个元素)
 
 [时间复杂度]
     预处理: O(M)  # M为模式串长度
-    匹配: O(N)    # N为文本串长度
+    匹配: O(N)  # N为文本串长度
 [空间复杂度]
     O(M)
 
@@ -131,9 +134,9 @@ class KMP:
     def __init__(self, pattern: str):
 
         self.pattern = pattern
-        self.pi = self._compute_pi()
+        self.pi = self._run()
 
-    def _compute_pi(self) -> List[int]:
+    def _run(self) -> List[int]:
         """ 计算前缀函数 """
         
         n = len(self.pattern)
@@ -145,6 +148,7 @@ class KMP:
             if self.pattern[i] == self.pattern[match]:
                 match += 1
             pi[i] = match
+
         return pi
 
     def search(self, text: str) -> List[int]:
