@@ -28,9 +28,10 @@ class StringHashSingleMod:
     def __init__(self, s: str):
 
         self.s = s
+        self.n = len(s)
+        # mod 与 base 随机一个即可, 以避免被hack
         self.mod = 1070777777
         self.base = 900000000 - random.randint(0, 100000000)
-        self.n = len(s)
         self.pow_base = [1] * (self.n + 1)
         self.pre_hash = [0] * (self.n + 1)
         self._run()
@@ -45,8 +46,7 @@ class StringHashSingleMod:
     def get_hash(self, l: int, r: int) -> int:
         """ 获取子串哈希值 [l, r] """
 
-        r += 1
-        return ((self.pre_hash[r] - self.pre_hash[l] * self.pow_base[r - l]) % self.mod + self.mod) % self.mod
+        return ((self.pre_hash[r + 1] - self.pre_hash[l] * self.pow_base[r + 1 - l]) % self.mod + self.mod) % self.mod
 
 
 """
