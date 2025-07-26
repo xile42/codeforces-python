@@ -37,7 +37,7 @@ class StringHashSingleMod:
         self._run()
 
     def _run(self):
-        """ 预处理哈希值 """
+        """ 预处理哈希值, 多项式系数前缀和数组 """
 
         for i in range(1, self.n + 1):
             self.pow_base[i] = (self.pow_base[i - 1] * self.base) % self.mod
@@ -74,17 +74,18 @@ class StringHashDoubleMod:
     def __init__(self, s: str):
 
         self.s = s
+        self.n = len(s)
+        # mod 与 base 随机一组即可, 以避免被hack
         self.mod1 = 1070777777
         self.mod2 = 1000000007
         self.base1 = 900000000 - random.randint(0, 100000000)
         self.base2 = 900000000 - random.randint(0, 100000000)
-        self.n = len(s)
         self.pow_base = [(1, 1)] * (self.n + 1)
         self.pre_hash = [(0, 0)] * (self.n + 1)
         self._run()
 
     def _run(self):
-        """ 计算双模哈希值 """
+        """ 预处理哈希值, 多项式系数前缀和数组 """
 
         for i in range(1, self.n + 1):
             pb1, pb2 = self.pow_base[i - 1]
@@ -98,9 +99,8 @@ class StringHashDoubleMod:
     def get_hash(self, l: int, r: int) -> Tuple[int, int]:
         """ 获取子串双模哈希值 [l, r] """
 
-        r += 1
-        h1 = ((self.pre_hash[r][0] - self.pre_hash[l][0] * self.pow_base[r - l][0]) % self.mod1 + self.mod1) % self.mod1
-        h2 = ((self.pre_hash[r][1] - self.pre_hash[l][1] * self.pow_base[r - l][1]) % self.mod2 + self.mod2) % self.mod2
+        h1 = ((self.pre_hash[r + 1][0] - self.pre_hash[l][0] * self.pow_base[r + 1 - l][0]) % self.mod1 + self.mod1) % self.mod1
+        h2 = ((self.pre_hash[r + 1][1] - self.pre_hash[l][1] * self.pow_base[r + 1 - l][1]) % self.mod2 + self.mod2) % self.mod2
 
         return (h1, h2)
 
