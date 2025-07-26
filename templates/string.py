@@ -36,13 +36,16 @@ class StringHashSingleMod:
         self._run()
 
     def _run(self):
-        """计算哈希值"""
+        """ 预处理哈希值 """
+
         for i in range(1, self.n + 1):
             self.pow_base[i] = (self.pow_base[i - 1] * self.base) % self.mod
             self.pre_hash[i] = (self.pre_hash[i - 1] * self.base + ord(self.s[i - 1])) % self.mod
 
     def get_hash(self, l: int, r: int) -> int:
-        """获取子串哈希值 [l, r)"""
+        """ 获取子串哈希值 [l, r] """
+
+        r += 1
         return ((self.pre_hash[r] - self.pre_hash[l] * self.pow_base[r - l]) % self.mod + self.mod) % self.mod
 
 
@@ -67,9 +70,9 @@ codeforces-python: 算法竞赛Python3模板库
 https://github.com/xile42/codeforces-python/blob/main/templates/string.py
 """
 class StringHashDoubleMod:
-    """双模哈希算法"""
 
     def __init__(self, s: str):
+
         self.s = s
         self.mod1 = 1070777777
         self.mod2 = 1000000007
@@ -78,10 +81,11 @@ class StringHashDoubleMod:
         self.n = len(s)
         self.pow_base = [(1, 1)] * (self.n + 1)
         self.pre_hash = [(0, 0)] * (self.n + 1)
-        self._compute()
+        self._run()
 
-    def _compute(self):
-        """计算双模哈希值"""
+    def _run(self):
+        """ 计算双模哈希值 """
+
         for i in range(1, self.n + 1):
             pb1, pb2 = self.pow_base[i - 1]
             self.pow_base[i] = (pb1 * self.base1 % self.mod1, pb2 * self.base2 % self.mod2)
@@ -92,9 +96,12 @@ class StringHashDoubleMod:
             )
 
     def get_hash(self, l: int, r: int) -> Tuple[int, int]:
-        """获取子串双模哈希值 [l, r)"""
+        """ 获取子串双模哈希值 [l, r] """
+
+        r += 1
         h1 = ((self.pre_hash[r][0] - self.pre_hash[l][0] * self.pow_base[r - l][0]) % self.mod1 + self.mod1) % self.mod1
         h2 = ((self.pre_hash[r][1] - self.pre_hash[l][1] * self.pow_base[r - l][1]) % self.mod2 + self.mod2) % self.mod2
+
         return (h1, h2)
 
 
@@ -122,11 +129,13 @@ https://github.com/xile42/codeforces-python/blob/main/templates/string.py
 class KMP:
 
     def __init__(self, pattern: str):
+
         self.pattern = pattern
         self.pi = self._compute_pi()
 
     def _compute_pi(self) -> List[int]:
-        """计算前缀函数"""
+        """ 计算前缀函数 """
+        
         n = len(self.pattern)
         pi = [0] * n
         match = 0
@@ -139,8 +148,9 @@ class KMP:
         return pi
 
     def search(self, text: str) -> List[int]:
-        """在文本中搜索模式串"""
-        pos = []
+        """ 在文本中搜索模式串 """
+        
+        pos = list()
         match = 0
         for i in range(len(text)):
             while match > 0 and text[i] != self.pattern[match]:
@@ -150,6 +160,7 @@ class KMP:
             if match == len(self.pattern):
                 pos.append(i - len(self.pattern) + 1)
                 match = self.pi[match - 1]
+
         return pos
 
 
