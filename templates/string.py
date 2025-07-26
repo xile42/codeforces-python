@@ -134,15 +134,15 @@ class KMP:
     def __init__(self, pattern: str):
 
         self.pattern = pattern
+        self.n = len(self.pattern)
         self.pi = self._run()
 
     def _run(self) -> List[int]:
         """ 计算前缀函数 """
         
-        n = len(self.pattern)
-        pi = [0] * n
+        pi = [0] * self.n
         match = 0
-        for i in range(1, n):
+        for i in range(1, self.n):
             while match > 0 and self.pattern[i] != self.pattern[match]:
                 match = pi[match - 1]
             if self.pattern[i] == self.pattern[match]:
@@ -166,6 +166,25 @@ class KMP:
                 match = self.pi[match - 1]
 
         return pos
+
+    def has_repeated_substring(self) -> bool:
+        """ 检测模式串是否由某个子串重复多次构成 """
+
+        if self.n == 0:
+            return False
+        # 检查是否满足 n % (n - π[n-1]) == 0 且 π[n-1] != 0
+        return self.pi[-1] != 0 and self.n % (self.n - self.pi[-1]) == 0
+
+    def get_repeated_substring(self) -> Optional[str]:
+        """ 获取构成模式串的循环节(如果存在) """
+
+        if self.n == 0 or self.pi[-1] == 0:
+            return None
+
+        if self.n % (self.n - self.pi[-1]) == 0:
+            return self.pattern[:self.n - self.pi[-1]]
+
+        return None
 
 
 """
