@@ -135,13 +135,13 @@ class DiffArray:
         ans = list()
         cur = start = 0
         for i in range(len(xs)):
+            cur += diff[xs[i]]
             if cur > 0 and start == 0:  # 进入覆盖区
                 start = xs[i]
             elif cur == 0 and start > 0:  # 离开覆盖区
                 ans.append((start, xs[i] - 1))
                 start = 0
-            cur += diff[xs[i]]
-
+            
         return ans
 
     @staticmethod
