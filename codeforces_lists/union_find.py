@@ -29,7 +29,7 @@ CodeForces Union Find 题单:
     1. https://codeforces.com/problemset/problem/1927/D 1300  [√ Accecpt using template #3]
 
     [质因子并查集]
-    - 预处理质因子(见 math.go 中的 primeDivisorsAll)
+    - 预处理质因子(见 math.py 中的 #1 埃氏筛(EratosthenesSieve) 与 #2 欧拉筛(EulerSieve))
     - 枚举 a[i] 的质因子 p, 用 pre[p] 记录质因子上一次出现的下标(初始化成 -1), 然后 merge(i, pre[p]) if pre[p] > 0
     1. https://codeforces.com/contest/1978/problem/F 2400
 
