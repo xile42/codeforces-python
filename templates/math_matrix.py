@@ -1,0 +1,598 @@
+# 3B1B 线性代数的本质 https://www.bilibili.com/video/BV1ys411472E
+
+""" 矩阵加速
+https://zh.wikipedia.org/wiki/%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97#%E7%B7%9A%E6%80%A7%E4%BB%A3%E6%95%B8%E8%A7%A3%E6%B3%95
+https://zhuanlan.zhihu.com/p/56444434
+https://codeforces.com/blog/entry/80195 Matrix Exponentiation video + training contest
+浅谈矩阵乘法在算法竞赛中的应用 https://zhuanlan.zhihu.com/p/631804105
+F2 矩阵 有可能是可逆的，和或的 01 矩阵 似乎是肯定不可逆的，逆矩阵有时候也有一定的应用场景
+除了直接的矩阵乘法，矩阵加法有时候也有用，有时候可以通过分块矩阵 或者逆矩阵 把连加表达成矩阵求幂
+https://atcoder.jp/contests/abc299/tasks/abc299_h
+这个开关灯问题 也涉及F2矩阵的逆矩阵（或高斯消元） https://github.com/tdzl2003/leetcode_live/blob/master/poj/1222_1753_3279.md
+F2 矩阵 int64 to int64 的散列（可逆意味着一一映射，意味着无冲突） https://github.com/tdzl2003/leetcode_live/blob/master/other/int64_hash.md
+
+三对角矩阵算法（托马斯算法）https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+https://codeforces.com/contest/24/problem/D
+
+哈密尔顿–凯莱定理 Cayley–Hamilton theorem
+特征多项式是零化多项式
+https://en.wikipedia.org/wiki/Cayley%E2%80%93Hamilton_theorem
+
+浅谈范德蒙德(Vandermonde)方阵的逆矩阵与拉格朗日(Lagrange)插值的关系以及快速傅里叶变换(FFT)中IDFT的原理 https://www.cnblogs.com/gzy-cjoier/p/9741950.html
+
+模板题 https://www.luogu.com.cn/problem/P1939 https://ac.nowcoder.com/acm/contest/6357/A
+https://codeforces.com/problemset/problem/1182/E
+https://atcoder.jp/contests/abc232/tasks/abc232_e
+https://atcoder.jp/contests/dp/tasks/dp_r 有向图中长为 k 的路径数
+TR 的数列 https://blog.csdn.net/zyz_bz/article/details/88993616
+挑战 P202 一维方块染色 http://poj.org/problem?id=3734
+3xM 的格子，其中有一些障碍物，求从第二行最左走到第二行最右的方案数，每次可以向右/右上/右下走一步 https://codeforces.com/problemset/problem/954/F
+https://codeforces.com/problemset/problem/166/E
+
+min max 矩阵快速幂
+https://atcoder.jp/contests/abc236/tasks/abc236_g
+
+& xor 矩阵快速幂
+https://atcoder.jp/contests/abc009/tasks/abc009_4
+
+todo poj 2345 3532 3526
+"""
+
+import copy
+
+# 一些题目：https://oi-wiki.org/math/matrix/
+
+def read_matrix(n, m):
+    """从输入读取矩阵"""
+    a = []
+    for i in range(n):
+        row = list(map(int, input().split()))
+        a.append(row)
+    return a
+
+def copy_matrix(a):
+    """复制矩阵"""
+    return [row[:] for row in a]
+
+def rotate_matrix(a):
+    """顺时针转 90°"""
+    n, m = len(a), len(a[0])
+    b = [[0] * n for _ in range(m)]
+    for j in range(m):
+        for i in range(n):
+            b[j][n - 1 - i] = a[i][j]
+    return b
+
+"""
+矩阵快速幂优化 DP
+视频讲解：https://www.bilibili.com/video/BV1hn1MYhEtC/?t=21m27s
+文字讲解：https://leetcode.cn/problems/student-attendance-record-ii/solutions/2885136/jiao-ni-yi-bu-bu-si-kao-dpcong-ji-yi-hua-a8kj/
+m 项递推式，以及包含常数项的情况见《挑战》P201
+https://codeforces.com/problemset/problem/450/B 1300 也可以找规律
+https://www.luogu.com.cn/problem/P10310
+https://ac.nowcoder.com/acm/contest/9247/A
+https://codeforces.com/problemset/problem/1117/D a(n) = a(n-1) + a(n-m)
+https://www.luogu.com.cn/problem/P3216 12345678910111213...n % m
+
+https://www.luogu.com.cn/problem/P9777
+已知 f(1) = x + 1/x = k，计算 f(n) = x^n + 1/x^n
+由于 f(n) * f(1) = f(n+1) + f(n-1)
+所以 f(n+1) = k*f(n) - f(n-1)，矩阵快速幂解决
+"""
+
+mod = 10**9 + 7  # 根据需要设置模数
+
+class Matrix:
+    def __init__(self, data):
+        self.data = data
+        self.n = len(data)
+        self.m = len(data[0]) if data else 0
+
+    @classmethod
+    def new_matrix(cls, n, m):
+        """创建 n×m 的零矩阵"""
+        return cls([[0] * m for _ in range(n)])
+
+    def mul(self, b):
+        """矩阵乘法"""
+        c_data = [[0] * b.m for _ in range(self.n)]
+        for i in range(self.n):
+            for k in range(self.m):
+                x = self.data[i][k]
+                if x == 0:
+                    continue
+                for j in range(b.m):
+                    c_data[i][j] = (c_data[i][j] + x * b.data[k][j]) % mod
+        return Matrix(c_data)
+
+    def pow_mul(self, n, f0):
+        """a^n * f0"""
+        res = f0
+        a = Matrix(copy_matrix(self.data))
+        while n > 0:
+            if n % 2 > 0:
+                res = a.mul(res)
+            a = a.mul(a)
+            n //= 2
+        return res
+
+    def pow(self, n):
+        """矩阵快速幂"""
+        res = Matrix.new_identity_matrix(self.n)
+        a = Matrix(copy_matrix(self.data))
+        while n > 0:
+            if n % 2 > 0:
+                res = res.mul(a)
+            a = a.mul(a)
+            n //= 2
+        return res
+
+    @classmethod
+    def new_identity_matrix(cls, n):
+        """创建 n×n 的单位矩阵"""
+        data = [[0] * n for _ in range(n)]
+        for i in range(n):
+            data[i][i] = 1
+        return cls(data)
+
+    def add(self, b):
+        """矩阵加法"""
+        c_data = [[0] * self.m for _ in range(self.n)]
+        for i in range(self.n):
+            for j in range(self.m):
+                c_data[i][j] = self.data[i][j] + b.data[i][j]  # % mod
+        return Matrix(c_data)
+
+    def sub(self, b):
+        """矩阵减法"""
+        c_data = [[0] * self.m for _ in range(self.n)]
+        for i in range(self.n):
+            for j in range(self.m):
+                c_data[i][j] = self.data[i][j] - b.data[i][j]  # % mod) + mod) % mod
+        return Matrix(c_data)
+
+    def swap_rows(self, i, j):
+        """交换行"""
+        self.data[i], self.data[j] = self.data[j], self.data[i]
+
+    def swap_cols(self, i, j):
+        """交换列"""
+        for k in range(self.n):
+            self.data[k][i], self.data[k][j] = self.data[k][j], self.data[k][i]
+
+    def mul_row(self, i, k):
+        """第i行乘以k"""
+        for j in range(self.m):
+            self.data[i][j] *= k  # % mod
+
+    def trace(self):
+        """矩阵的迹"""
+        return sum(self.data[i][i] for i in range(self.n))
+
+    def solve(self, sx, sy, tx, ty, k):
+        """比如 n*n 的国际象棋的马，从 (sx,sy) 走 k 步到 (tx,ty)，需要多少步"""
+        n = int(self.n ** 0.5)  # 假设是 n^2 × n^2 的矩阵
+        b_data = [[0] * (n * n)]
+        b_data[0][sx * n + sy] = 1
+        b = Matrix(b_data)
+        res = b.mul(self.pow(k))
+        return res.data[0][tx * n + ty]
+
+# 一般是状态机 DP
+# 操作 k 次
+def solve_dp(k):
+    size = 26  # 第二维度的大小
+
+    # DP 初始值（递归边界）
+    # 一般是一个全为 1 的列向量，对应初始值 f[0][j]=1 或者递归边界 dfs(0,j)=1
+    f0 = Matrix.new_matrix(size, 1)
+    for i in range(size):
+        f0.data[i][0] = 1
+
+    # 例如，递推式中的 f[i][j] += f[i-1][k] * 2，提取系数得 m[j][k] = 2
+    m = Matrix.new_matrix(size, size)
+    for j in range(size):
+        m.data[j][(j + 1) % size] = 3  # 如果 f[i][j] += f[i-1][j+1] * 3
+        m.data[j][(j + 2) % size] = 5  # 如果 f[i][j] += f[i-1][j+2] * 5
+
+    # fk 和 f0 一样，都是长为 size 的列向量
+    fk = m.pow_mul(k, f0)
+
+    # 现在 fk[i][0] 就是 f[k][i] 或者 dfs(k,i)
+    # 特别地，fk[0][0] 就是 f[k][0] 或者 dfs(k,0)
+    ans = 0
+    for row in fk.data:
+        ans += row[0]  # 举例 ans = sum(f[k])
+    ans %= mod
+
+    return ans
+
+# -----------------------------------------------------------------------------
+
+# 广义斐波那契数列
+# a(n) = p*a(n-1) + q*a(n-2)
+# ！数列下标从 1 开始，n 从 1 开始
+# https://www.luogu.com.cn/problem/P1349
+# https://www.luogu.com.cn/problem/P1939
+def calc_fibonacci(p, q, a1, a2, n):
+    if n == 1:
+        return a1 % mod
+
+    # 变形得到 [f[n], f[n-1]] = [[p, q], [1, 0]] = [f[n-1], f[n-2]]
+    # 也可以用打家劫舍的状态机写法理解，其中 f[i][0] 表示 i 可选可不选，f[i][1] 表示 i 一定不能选
+    # f[i][0] += p*f[i-1][0] 不选 i
+    # f[i][0] += q*f[i-1][1] 选 i，那么 i-1 一定不能选
+    # f[i][1] = f[i-1][0]
+    # 提取系数得 m[0][0] = p，m[0][1] = q，m[1][0] = 1
+    m = Matrix([
+        [p, q],
+        [1, 0]
+    ])
+    f2 = Matrix([
+        [a2],
+        [a1]
+    ])
+    # 结果是列向量 [f[n], f[n-1]]，取第一项
+    fn = m.pow_mul(n - 2, f2)
+    return fn.data[0][0]
+
+def pow_mod(a, n, mod):
+    """快速幂"""
+    res = 1
+    while n > 0:
+        if n % 2 > 0:
+            res = res * a % mod
+        a = a * a % mod
+        n //= 2
+    return res
+
+# NxN 矩阵求逆
+# 模板题 https://www.luogu.com.cn/problem/P4783
+def matrix_inv(A):
+    """矩阵求逆"""
+    # 增广一个单位矩阵
+    n = len(A)
+    m = 2 * n
+    a = []
+    for i in range(n):
+        row = [0] * m
+        for j in range(n):
+            row[j] = A[i][j]  # or read
+        row[n + i] = 1
+        a.append(row)
+
+    for i in range(n):
+        for j in range(i, n):
+            if a[j][i] != 0:
+                a[i], a[j] = a[j], a[i]
+                break
+
+        if a[i][i] == 0:
+            # 矩阵不是满秩的
+            return None
+
+        inv = pow_mod(a[i][i], mod - 2, mod)
+        for j in range(i, m):
+            a[i][j] = a[i][j] * inv % mod
+
+        for j in range(n):
+            if j != i:
+                inv = a[j][i]
+                for k in range(i, m):
+                    a[j][k] = (a[j][k] - inv * a[i][k] % mod + mod) % mod
+
+    # 结果保存在 a 右侧
+    res = []
+    for i in range(n):
+        res.append(a[i][n:])
+    return res
+
+# 高斯消元 Gaussian elimination O(n^3)   列主元消去法
+# 求解 Ax=B，A 为方阵，返回解（无解或有无穷多组解）
+# https://en.wikipedia.org/wiki/Gaussian_elimination
+# https://en.wikipedia.org/wiki/Pivot_element#Partial_and_complete_pivoting
+# https://oi-wiki.org/math/gauss/
+# 总结 https://cloud.tencent.com/developer/article/1087352
+# https://cp-algorithms.com/linear_algebra/determinant-gauss.html
+# https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/GaussianElimination.java.html
+# https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/GaussJordanElimination.java.html
+# 模板题 https://www.luogu.com.cn/problem/P3389 https://www.luogu.com.cn/problem/P2455
+#       https://codeforces.com/problemset/problem/21/B
+# https://www.luogu.com.cn/problem/P4035
+# https://www.luogu.com.cn/problem/P6030 与 SCC 结合
+#
+# 三对角矩阵算法 托马斯算法
+# https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+# https://codeforces.com/problemset/problem/24/D 2400
+def gauss_jordan_elimination(A, B):
+    """高斯-约旦消元法"""
+    eps = 1e-8
+    n = len(A)
+    # 构造增广矩阵 (or read)
+    a = []
+    for i in range(n):
+        row = [float(A[i][j]) for j in range(n)]
+        row.append(float(B[i]))
+        a.append(row)
+
+    row = 0
+    for col in range(n):
+        # 列主元消去法：减小误差，把正在处理的未知数系数的绝对值最大的式子换到第 row 行
+        pivot = row
+        for i in range(row, n):
+            if abs(a[i][col]) > abs(a[pivot][col]):
+                pivot = i
+
+        # 这一列全为 0，表明无解或有无穷多解，具体是哪一种需要消元完成后才知道
+        if abs(a[pivot][col]) < eps:
+            continue
+
+        a[row], a[pivot] = a[pivot], a[row]
+
+        # 初等行变换：把正在处理的未知数的系数变为 1
+        for j in range(col + 1, n + 1):
+            a[row][j] /= a[row][col]
+
+        # 消元，构造简化行梯阵式
+        for i in range(n):
+            if i != row:
+                # 用当前行对其余行消元：从第 i 个式子中消去第 col 个未知数
+                for j in range(col + 1, n + 1):
+                    a[i][j] -= a[i][col] * a[row][j]
+        row += 1
+
+    if row < n:
+        for r in a[row:]:
+            if abs(r[n]) > eps:
+                return None, False  # 无解
+        return None, True  # 有无穷多解
+
+    res = [a[i][n] for i in range(n)]
+    return res, False
+
+# EXTRA: 求行列式（对结果模 mod）
+# https://en.wikipedia.org/wiki/Determinant
+# 参考 https://www.luogu.com.cn/blog/Stormy-Rey/calculate-det
+# https://www.luogu.com.cn/problem/P7112
+def determinant(a, mod):
+    """求矩阵行列式"""
+    n = len(a)
+    res, sign = 1, 1
+    for i in range(n):
+        for j in range(i + 1, n):
+            while a[i][i] != 0:
+                div = a[j][i] // a[i][i]
+                for k in range(i, n):
+                    a[j][k] = (a[j][k] - a[i][k] * div % mod + mod) % mod
+                a[i], a[j], sign = a[j], a[i], -sign
+            a[i], a[j], sign = a[j], a[i], -sign
+
+    for i in range(n):
+        res = res * a[i][i] % mod
+    res = (res * sign + mod) % mod
+    return res
+
+# 求矩阵的特征多项式
+# todo https://www.cnblogs.com/ywwyww/p/8522541.html
+#  https://www.luogu.com.cn/problem/P7776
+
+# 最短递推式
+# todo
+#  Berlekamp–Massey 算法
+#  https://mzhang2021.github.io/cp-blog/berlekamp-massey/
+#  https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm
+#  https://oi-wiki.org/math/berlekamp-massey/
+#  https://codeforces.com/blog/entry/61306
+#  https://codeforces.com/blog/entry/96199
+#  https://www.luogu.com.cn/problem/P5487
+#  https://codeforces.com/problemset/problem/1511/F 2700
+#  https://codeforces.com/problemset/problem/506/E
+#  https://leetcode.cn/problems/total-characters-in-string-after-transformations-ii/description/
+#  - https://leetcode.cn/problems/total-characters-in-string-after-transformations-ii/solutions/2973816/os2logtjie-fa-bmsuan-fa-you-hua-ju-zhen-gdknh/
+
+# 线性基（异或空间的极大线性无关子集）
+# 可以用来解决「子序列异或和」相关问题
+# https://oi-wiki.org/math/basis/
+# https://en.wikipedia.org/wiki/Basis_(linear_algebra)
+# 【推荐】https://www.luogu.com.cn/blog/Marser/solution-p3812
+# 线性基学习笔记 https://oi.men.ci/linear-basis-notes/
+# XOR basis without linear algebra https://codeforces.com/blog/entry/100066
+# https://www.luogu.com.cn/blog/i207M/xian-xing-ji-xue-xi-bi-ji-xie-ti-bao-gao
+# 讲解+题单 https://www.cnblogs.com/UntitledCpp/p/13912602.html
+# https://www.luogu.com.cn/blog/Troverld/xian-xing-ji-xue-xi-bi-ji
+# todo 讲到了线性基的删除操作 https://blog.csdn.net/a_forever_dream/article/details/83654397
+# 线性基求交 https://www.cnblogs.com/BakaCirno/p/11298102.html
+# https://zhuanlan.zhihu.com/p/139074556
+#
+# 模板题 https://www.luogu.com.cn/problem/P3812 https://loj.ac/p/113
+# 题单 https://www.luogu.com.cn/training/11251
+# https://codeforces.com/problemset/problem/845/G 2300 异或最短路/最长路
+# - https://www.luogu.com.cn/problem/P4151
+# https://codeforces.com/problemset/problem/1101/G 2300
+# https://codeforces.com/problemset/problem/662/A 2400 博弈
+# https://codeforces.com/problemset/problem/959/F 2400
+# https://codeforces.com/problemset/problem/1163/E 2400
+# https://codeforces.com/problemset/problem/1902/F 2400 LCA
+# - https://www.luogu.com.cn/problem/P3292 [SCOI2016] 幸运数字
+# https://codeforces.com/problemset/problem/1100/F 2500
+# https://codeforces.com/problemset/problem/1427/E 2500 构造
+# https://codeforces.com/problemset/problem/1778/E 2500
+# https://codeforces.com/problemset/problem/724/G 2600 图上线性基
+# https://codeforces.com/problemset/problem/251/D 2700 输出具体方案
+# - https://atcoder.jp/contests/abc141/tasks/abc141_f 简单版本
+# https://codeforces.com/problemset/problem/19/E 2900 图上线性基
+# https://codeforces.com/problemset/problem/587/E 2900
+# - https://www.luogu.com.cn/problem/P5607
+# https://codeforces.com/problemset/problem/1336/E2 3500
+# https://atcoder.jp/contests/abc141/tasks/abc141_f
+# https://www.luogu.com.cn/problem/P3857
+# https://loj.ac/p/2978
+# - https://codeforces.com/problemset/problem/895/C
+
+class XorBasis:
+    def __init__(self, a=None):
+        self.b = [0] * 64  # 核心就这一个，or 32
+
+        self.right_most = [0] * 64  # 注意这里是 0
+        self.right_most_zero = -1   # 注意这里是 -1
+
+        self.num = 0
+        self.or_val = 0
+
+        self.can_be_zero = False  # 见 min_xor 和 kth_xor
+        self.basis = None         # 见 init_once
+
+        if a:
+            for v in a:
+                self.insert(v)
+
+    # 尝试插入 v，看能否找到一个新的线性无关基
+    # 针对稀疏二进制的写法 https://leetcode.cn/problems/partition-array-for-maximum-xor-and-and/solution/shi-zi-bian-xing-xian-xing-ji-pythonjava-3e80/
+    def insert(self, v):
+        self.or_val |= v
+        # 从高到低遍历，保证计算 max_xor 的时候，参与 XOR 的基的最高位（或者说二进制长度）是互不相同的
+        for i in range(len(self.b) - 1, -1, -1):
+            if v >> i == 0:  # 由于大于 i 的位都被我们异或成了 0，所以 v>>i 的结果只能是 0 或 1
+                continue
+            if self.b[i] == 0:  # x 和之前的基是线性无关的
+                self.b[i] = v   # 新增一个基，最高位为 i
+                self.num += 1
+                return True
+            v ^= self.b[i]  # 保证每个基的二进制长度互不相同
+        # 正常循环结束，此时 x=0，说明一开始的 x 可以被已有基表出，不是一个线性无关基
+        self.can_be_zero = True  # 说明存在非空集合，异或和为 0
+        return False
+
+    # EXTRA: 从高到低，对于二进制长度相同的基，选更靠右的
+    # https://atcoder.jp/contests/abc223/tasks/abc223_h
+    # https://codeforces.com/problemset/problem/1902/F 2400
+    # https://codeforces.com/problemset/problem/1100/F 2500
+    # https://codeforces.com/problemset/problem/1778/E 2500
+    def insert_right_most(self, idx, v):
+        for i in range(len(self.b) - 1, -1, -1):
+            if v >> i == 0:
+                continue
+            if self.b[i] == 0:
+                self.b[i] = v
+                self.right_most[i] = idx
+                self.num += 1
+                return True
+            # 替换掉之前的基，尽量保证基的下标都是最新的
+            # 替换后，可能插入新的基，也可能淘汰掉旧的基
+            if idx > self.right_most[i]:
+                idx, self.right_most[i] = self.right_most[i], idx
+                v, self.b[i] = self.b[i], v
+            v ^= self.b[i]
+        self.can_be_zero = True  # 没有找到，但这说明了可以选一些数使得异或和为 0
+        self.right_most_zero = max(self.right_most_zero, idx)
+        return False
+
+    # v 能否被线性基表出
+    def decompose(self, v):
+        for i in range(len(self.b) - 1, -1, -1):
+            if v >> i == 0:
+                continue
+            # 配合 insert_right_most
+            # self.b[i] == 0 or self.right_most[i] < lower_index
+            if self.b[i] == 0:
+                return False
+            v ^= self.b[i]
+        return True
+
+    # 返回能被线性基表出的最大值
+    # 如果线性基为空，返回 0
+    # https://www.luogu.com.cn/problem/P3812
+    # https://loj.ac/p/113
+    # https://leetcode.cn/problems/partition-array-for-maximum-xor-and-and/solutions/3734850/shi-zi-bian-xing-xian-xing-ji-pythonjava-3e80/
+    def max_xor(self):
+        res = 0
+        for i in range(len(self.b) - 1, -1, -1):
+            res = max(res, res ^ self.b[i])
+        return res
+
+    def max_xor_with_val(self, val):
+        res = val
+        for i in range(len(self.b) - 1, -1, -1):
+            res = max(res, res ^ self.b[i])
+        return res
+
+    # 配合 insert_right_most
+    def max_xor_with_lower_index(self, lower_index):
+        res = 0
+        for i in range(len(self.b) - 1, -1, -1):
+            if (res >> i) & 1 == 0 and self.right_most[i] >= lower_index:
+                res = max(res, res ^ self.b[i])
+        return res
+
+    # 考虑插入的过程，因为每一次跳转操作，x 的二进制最高位必定单调降低，所以不可能插入两个二进制最高位相同的数。
+    # 而此时，线性基中最小值异或上其他数，必定会增大。
+    # 所以，直接输出线性基中的最小值即可。
+    def min_xor(self):
+        if self.can_be_zero:
+            return 0
+        for i in range(len(self.b)):
+            if self.b[i] > 0:
+                return self.b[i]
+
+    def init_once(self):
+        if self.basis is not None:
+            return
+        tmp = self.b[:]
+        self.basis = []
+        for i in range(len(tmp)):
+            if tmp[i] == 0:
+                continue
+            for j in range(i - 1, -1, -1):
+                if (tmp[i] >> j) & 1 > 0:
+                    tmp[i] ^= tmp[j]
+            self.basis.append(tmp[i])
+
+    # 线性基能表出的所有不同元素中的第 k 小值（不允许空）
+    # k 从 1 开始
+    # https://loj.ac/p/114 http://acm.hdu.edu.cn/showproblem.php?pid=3949
+    def kth_xor(self, k):
+        self.init_once()
+        if self.can_be_zero:  # 0 是最小的
+            k -= 1  # 占用了一个数
+        if k >= 1 << len(self.basis):  # 非空子集有 2^len(self.basis) - 1 个
+            return -1
+        xor = 0
+        for i, v in enumerate(self.basis):
+            if (k >> i) & 1 > 0:
+                xor ^= v
+        return xor
+
+    # todo https://www.luogu.com.cn/problem/P4869
+    def rank(self, xor):
+        raise NotImplementedError("todo")
+
+    # https://codeforces.com/problemset/problem/1902/F
+    def merge(self, other):
+        for i in range(len(other.b) - 1, -1, -1):
+            v = other.b[i]
+            if v > 0:
+                self.insert(v)
+
+""" 矩阵树定理 基尔霍夫定理 Kirchhoff's theorem
+https://oi-wiki.org/graph/matrix-tree/
+https://en.wikipedia.org/wiki/Kirchhoff%27s_theorem
+
+https://atcoder.jp/contests/jsc2021/tasks/jsc2021_g
+https://atcoder.jp/contests/abc253/tasks/abc253_h
+https://atcoder.jp/contests/abc323/tasks/abc323_g
+"""
+
+# 线性规划（单纯形法）  LP, linear programming (simplex method)
+# https://en.wikipedia.org/wiki/Mathematical_optimization
+# https://en.wikipedia.org/wiki/Linear_programming
+# https://en.wikipedia.org/wiki/Integer_programming
+# https://en.wikipedia.org/wiki/Simplex_algorithm
+# todo https://oi-wiki.org/math/simplex/
+#      https://zhuanlan.zhihu.com/p/31644892
+#  https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/LinearProgramming.java.html
+#
+# todo https://uoj.ac/problem/179
+#  https://codeforces.com/problemset/problem/1430/G https://codeforces.com/blog/entry/83614?#comment-709868
+#  https://codeforces.com/problemset/problem/375/E
+#  NOI08 志愿者招募 https://www.luogu.com.cn/problem/P3980
+#       整数线性规划与全幺模矩阵 https://www.acwing.com/file_system/file/content/whole/index/content/2197334/
