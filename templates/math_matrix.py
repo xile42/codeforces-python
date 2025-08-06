@@ -1,182 +1,209 @@
-# 3B1B 线性代数的本质 https://www.bilibili.com/video/BV1ys411472E
+from typing import *
 
-""" 矩阵加速
-https://zh.wikipedia.org/wiki/%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97#%E7%B7%9A%E6%80%A7%E4%BB%A3%E6%95%B8%E8%A7%A3%E6%B3%95
-https://zhuanlan.zhihu.com/p/56444434
-https://codeforces.com/blog/entry/80195 Matrix Exponentiation video + training contest
-浅谈矩阵乘法在算法竞赛中的应用 https://zhuanlan.zhihu.com/p/631804105
-F2 矩阵 有可能是可逆的，和或的 01 矩阵 似乎是肯定不可逆的，逆矩阵有时候也有一定的应用场景
-除了直接的矩阵乘法，矩阵加法有时候也有用，有时候可以通过分块矩阵 或者逆矩阵 把连加表达成矩阵求幂
-https://atcoder.jp/contests/abc299/tasks/abc299_h
-这个开关灯问题 也涉及F2矩阵的逆矩阵（或高斯消元） https://github.com/tdzl2003/leetcode_live/blob/master/poj/1222_1753_3279.md
-F2 矩阵 int64 to int64 的散列（可逆意味着一一映射，意味着无冲突） https://github.com/tdzl2003/leetcode_live/blob/master/other/int64_hash.md
-
-三对角矩阵算法（托马斯算法）https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
-https://codeforces.com/contest/24/problem/D
-
-哈密尔顿–凯莱定理 Cayley–Hamilton theorem
-特征多项式是零化多项式
-https://en.wikipedia.org/wiki/Cayley%E2%80%93Hamilton_theorem
-
-浅谈范德蒙德(Vandermonde)方阵的逆矩阵与拉格朗日(Lagrange)插值的关系以及快速傅里叶变换(FFT)中IDFT的原理 https://www.cnblogs.com/gzy-cjoier/p/9741950.html
-
-模板题 https://www.luogu.com.cn/problem/P1939 https://ac.nowcoder.com/acm/contest/6357/A
-https://codeforces.com/problemset/problem/1182/E
-https://atcoder.jp/contests/abc232/tasks/abc232_e
-https://atcoder.jp/contests/dp/tasks/dp_r 有向图中长为 k 的路径数
-TR 的数列 https://blog.csdn.net/zyz_bz/article/details/88993616
-挑战 P202 一维方块染色 http://poj.org/problem?id=3734
-3xM 的格子，其中有一些障碍物，求从第二行最左走到第二行最右的方案数，每次可以向右/右上/右下走一步 https://codeforces.com/problemset/problem/954/F
-https://codeforces.com/problemset/problem/166/E
-
-min max 矩阵快速幂
-https://atcoder.jp/contests/abc236/tasks/abc236_g
-
-& xor 矩阵快速幂
-https://atcoder.jp/contests/abc009/tasks/abc009_4
-
-todo poj 2345 3532 3526
-"""
-
-import copy
-
-# 一些题目：https://oi-wiki.org/math/matrix/
-
-def read_matrix(n, m):
-    """从输入读取矩阵"""
-    a = []
-    for i in range(n):
-        row = list(map(int, input().split()))
-        a.append(row)
-    return a
-
-def copy_matrix(a):
-    """复制矩阵"""
-    return [row[:] for row in a]
-
-def rotate_matrix(a):
-    """顺时针转 90°"""
-    n, m = len(a), len(a[0])
-    b = [[0] * n for _ in range(m)]
-    for j in range(m):
-        for i in range(n):
-            b[j][n - 1 - i] = a[i][j]
-    return b
 
 """
-矩阵快速幂优化 DP
-视频讲解：https://www.bilibili.com/video/BV1hn1MYhEtC/?t=21m27s
-文字讲解：https://leetcode.cn/problems/student-attendance-record-ii/solutions/2885136/jiao-ni-yi-bu-bu-si-kao-dpcong-ji-yi-hua-a8kj/
-m 项递推式，以及包含常数项的情况见《挑战》P201
-https://codeforces.com/problemset/problem/450/B 1300 也可以找规律
-https://www.luogu.com.cn/problem/P10310
-https://ac.nowcoder.com/acm/contest/9247/A
-https://codeforces.com/problemset/problem/1117/D a(n) = a(n-1) + a(n-m)
-https://www.luogu.com.cn/problem/P3216 12345678910111213...n % m
-
-https://www.luogu.com.cn/problem/P9777
-已知 f(1) = x + 1/x = k，计算 f(n) = x^n + 1/x^n
-由于 f(n) * f(1) = f(n+1) + f(n-1)
-所以 f(n+1) = k*f(n) - f(n-1)，矩阵快速幂解决
+codeforces-python: 算法竞赛Python3模板库
+#1: 矩阵基础操作
+https://github.com/xile42/codeforces-python/blob/main/templates/math_matrix.py
 """
+class MatrixBasics:
+
+    @staticmethod
+    def read_matrix(n: int) -> List[List[int]]:
+
+        matrix = []
+        for _ in range(n):
+            row = list(map(int, input().split()))
+            matrix.append(row)
+
+        return matrix
+
+    @staticmethod
+    def copy_matrix(matrix: List[List[int]]) -> List[List[int]]:
+
+        return [row[:] for row in matrix]
+
+    @staticmethod
+    def rotate_matrix(matrix: List[List[int]]) -> List[List[int]]:
+
+        n, m = len(matrix), len(matrix[0])
+        ans = [[0] * n for _ in range(m)]
+        for j in range(m):
+            for i in range(n):
+                ans[j][n - 1 - i] = matrix[i][j]
+
+        return ans
+
+
+"""
+[矩阵快速幂(Matrix Exponentiation)]
+用于高效计算矩阵的幂运算, 常用于线性递推关系的快速计算(如斐波那契数列)和DP优化(尤其状态机DP)
+支持模运算以防止数值溢出
+
+[时间复杂度]
+    add/sub: O(N^2)  # 矩阵加减法
+    mul: O(N^3)  # 朴素矩阵乘法
+    pow_mul: O(logK * N^3)  # 快速幂, K为幂次
+[空间复杂度]
+    O(N^2)  # 存储矩阵
+
+[相关链接]
+    1. https://oi-wiki.org/math/linear-algebra/matrix/
+"""
+
+
+"""
+codeforces-python: 算法竞赛Python3模板库
+#2: 矩阵快速幂&运算
+https://github.com/xile42/codeforces-python/blob/main/templates/math_matrix.py
+"""
+class Matrix:
+
+    def __init__(self, matrix: List[List[int]], mod: Optional[int] = None) -> None:
+
+        self.matrix = matrix
+        self.mod = mod
+        self.rows = len(matrix)
+        self.cols = len(matrix[0]) if self.rows > 0 else 0  # 忽略列数相等检查
+
+    @classmethod
+    def new_matrix(cls, n: int, m: int, mod: Optional[int] = None) -> "Matrix":
+
+        return Matrix([[0] * m for _ in range(n)], mod)
+
+    def swap_rows(self, i: int, j: int) -> None:
+
+        if not (0 <= i < self.rows and 0 <= j < self.rows):
+            raise ValueError("Row index out of range")
+
+        self.matrix[i], self.matrix[j] = self.matrix[j], self.matrix[i]
+
+    def swap_cols(self, i: int, j: int) -> None:
+
+        if not (0 <= i < self.cols and 0 <= j < self.cols):
+            raise ValueError("Column index out of range")
+
+        for row in self.matrix:
+            row[i], row[j] = row[j], row[i]
+
+    def mul_row(self, i: int, k: int) -> None:
+
+        if not 0 <= i < self.rows:
+            raise ValueError("Row index out of range")
+
+        for j in range(self.cols):
+            self.matrix[i][j] *= k
+            if self.mod is not None:
+                self.matrix[i][j] %= self.mod
+
+    def trace(self) -> int:
+
+        if self.rows != self.cols:
+            raise ValueError("Trace is only defined for square matrices")
+
+        trace = 0
+        for i in range(self.rows):
+            trace += self.matrix[i][i]
+            if self.mod is not None:
+                trace %= self.mod
+
+        return trace
+
+    def __matmul__(self, other: "Matrix") -> "Matrix":
+        """ self @ other """
+
+        if self.cols != other.rows:
+            raise ValueError(f"Matrix dimension mismatch: {self.rows}x{self.cols} * {other.rows}x{other.cols}")
+
+        ans = Matrix.new_matrix(self.rows, other.cols, self.mod)
+
+        for i in range(self.rows):
+            for k in range(self.cols):
+                if self.matrix[i][k] == 0:
+                    continue  # 稀疏矩阵优化
+                for j in range(other.cols):
+                    ans.matrix[i][j] += self.matrix[i][k] * other.matrix[k][j]
+                    if self.mod is not None:
+                        ans.matrix[i][j] %= self.mod
+
+        return ans
+
+    def __add__(self, other: 'Matrix') -> 'Matrix':
+        """ self + other """
+
+        if self.rows != other.rows or self.cols != other.cols:
+            raise ValueError(f"Matrix dimension mismatch: {self.rows}x{self.cols} + {other.rows}x{other.cols}")
+
+        ans = Matrix.new_matrix(self.rows, self.cols, self.mod)
+
+        for i in range(self.rows):
+            for j in range(self.cols):
+                ans.matrix[i][j] = self.matrix[i][j] + other.matrix[i][j]
+                if self.mod is not None:
+                    ans.matrix[i][j] %= self.mod
+
+        return ans
+
+    def __sub__(self, other: 'Matrix') -> 'Matrix':
+        """ self - other """
+
+        if self.rows != other.rows or self.cols != other.cols:
+            raise ValueError(f"Matrix dimension mismatch: {self.rows}x{self.cols} - {other.rows}x{other.cols}")
+
+        ans = Matrix.new_matrix(self.rows, self.cols, self.mod)
+
+        for i in range(self.rows):
+            for j in range(self.cols):
+                ans.matrix[i][j] = self.matrix[i][j] - other.matrix[i][j]
+                if self.mod is not None:
+                    ans.matrix[i][j] = (ans.matrix[i][j] % self.mod + self.mod) % self.mod  # 确保结果为非负数
+
+        return ans
+
+    def pow_mul(self, n: int, f0: Optional["Matrix"] = None) -> "Matrix":
+        """ (matrix ^ n) * f0; 若f0 is None: matrix ^ n """
+
+        if f0 is None:
+
+            if self.rows != self.cols:
+                raise ValueError("Only square matrices can be raised to a power")
+            f0 = Matrix.new_matrix(self.rows, self.rows, self.mod)
+            for i in range(self.rows):
+                f0.matrix[i][i] = 1  # 初始化为单位矩阵
+
+        elif self.cols != f0.rows:
+
+            raise ValueError(f"Matrix dimension mismatch: {self.rows}x{self.cols} ^ {n} * {f0.rows}x{f0.cols}")
+
+        cur = self
+        ans = f0
+
+        while n > 0:
+            if n & 1:
+                ans = cur @ ans
+            cur = cur @ cur
+            n >>= 1
+
+        return ans
+
+    def __str__(self) -> str:
+
+        return "\n".join([" ".join(map(str, row)) for row in self.matrix])
+
+    def __eq__(self, other: object) -> bool:
+
+        if not isinstance(other, Matrix):
+            return False
+
+        return self.matrix == other.matrix
+
+
+
+# ↓TODO: 风格修改
+
 
 mod = 10**9 + 7  # 根据需要设置模数
 
-class Matrix:
-    def __init__(self, data):
-        self.data = data
-        self.n = len(data)
-        self.m = len(data[0]) if data else 0
-
-    @classmethod
-    def new_matrix(cls, n, m):
-        """创建 n×m 的零矩阵"""
-        return cls([[0] * m for _ in range(n)])
-
-    def mul(self, b):
-        """矩阵乘法"""
-        c_data = [[0] * b.m for _ in range(self.n)]
-        for i in range(self.n):
-            for k in range(self.m):
-                x = self.data[i][k]
-                if x == 0:
-                    continue
-                for j in range(b.m):
-                    c_data[i][j] = (c_data[i][j] + x * b.data[k][j]) % mod
-        return Matrix(c_data)
-
-    def pow_mul(self, n, f0):
-        """a^n * f0"""
-        res = f0
-        a = Matrix(copy_matrix(self.data))
-        while n > 0:
-            if n % 2 > 0:
-                res = a.mul(res)
-            a = a.mul(a)
-            n //= 2
-        return res
-
-    def pow(self, n):
-        """矩阵快速幂"""
-        res = Matrix.new_identity_matrix(self.n)
-        a = Matrix(copy_matrix(self.data))
-        while n > 0:
-            if n % 2 > 0:
-                res = res.mul(a)
-            a = a.mul(a)
-            n //= 2
-        return res
-
-    @classmethod
-    def new_identity_matrix(cls, n):
-        """创建 n×n 的单位矩阵"""
-        data = [[0] * n for _ in range(n)]
-        for i in range(n):
-            data[i][i] = 1
-        return cls(data)
-
-    def add(self, b):
-        """矩阵加法"""
-        c_data = [[0] * self.m for _ in range(self.n)]
-        for i in range(self.n):
-            for j in range(self.m):
-                c_data[i][j] = self.data[i][j] + b.data[i][j]  # % mod
-        return Matrix(c_data)
-
-    def sub(self, b):
-        """矩阵减法"""
-        c_data = [[0] * self.m for _ in range(self.n)]
-        for i in range(self.n):
-            for j in range(self.m):
-                c_data[i][j] = self.data[i][j] - b.data[i][j]  # % mod) + mod) % mod
-        return Matrix(c_data)
-
-    def swap_rows(self, i, j):
-        """交换行"""
-        self.data[i], self.data[j] = self.data[j], self.data[i]
-
-    def swap_cols(self, i, j):
-        """交换列"""
-        for k in range(self.n):
-            self.data[k][i], self.data[k][j] = self.data[k][j], self.data[k][i]
-
-    def mul_row(self, i, k):
-        """第i行乘以k"""
-        for j in range(self.m):
-            self.data[i][j] *= k  # % mod
-
-    def trace(self):
-        """矩阵的迹"""
-        return sum(self.data[i][i] for i in range(self.n))
-
-    def solve(self, sx, sy, tx, ty, k):
-        """比如 n*n 的国际象棋的马，从 (sx,sy) 走 k 步到 (tx,ty)，需要多少步"""
-        n = int(self.n ** 0.5)  # 假设是 n^2 × n^2 的矩阵
-        b_data = [[0] * (n * n)]
-        b_data[0][sx * n + sy] = 1
-        b = Matrix(b_data)
-        res = b.mul(self.pow(k))
-        return res.data[0][tx * n + ty]
 
 # 一般是状态机 DP
 # 操作 k 次
