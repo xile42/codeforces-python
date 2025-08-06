@@ -177,7 +177,6 @@ class Matrix:
 
         cur = self
         ans = f0
-
         while n > 0:
             if n & 1:
                 ans = cur @ ans
