@@ -216,6 +216,53 @@ class DiffArray2D:
 
 		return ans
 
+
+"""
+#4: 二维菱形/曼哈顿距离差分(矩阵实现)
+https://github.com/xile42/codeforces-python/blob/main/templates/diff_array.py
+"""
+class DiamondDiff:
+
+	@staticmethod
+	def diff_accumulate(m: int, n: int, operations: List[Tuple[int, int, int, int]]) -> List[List[int]]:
+
+		size = m + n + 1
+		diff1 = [[0] * (size + 2) for _ in range(size + 2)]  # 主对角线方向差分
+		diff2 = [[0] * (size + 2) for _ in range(size + 2)]  # 副对角线方向差分
+
+		for x, y, r, w in operations:
+			u1 = x + y
+			v1 = x - y + n
+			diff1[u1][max(0, v1 - r)] += w
+			diff1[u1][min(size, v1 + r + 1)] -= w
+			diff2[max(0, u1 - r)][v1] += w
+			diff2[min(size, u1 + r + 1)][v1] -= w
+
+		ans = [[0] * n for _ in range(m)]
+
+		acc1 = [[0] * (size + 2) for _ in range(size + 2)]
+		for i in range(size):
+			for j in range(size):
+				acc1[i][j] = diff1[i][j]
+				if j > 0:
+					acc1[i][j] += acc1[i][j - 1]
+
+		acc2 = [[0] * (size + 2) for _ in range(size + 2)]
+		for j in range(size):
+			for i in range(size):
+				acc2[i][j] = diff2[i][j]
+				if i > 0:
+					acc2[i][j] += acc2[i - 1][j]
+
+		for i in range(m):
+			for j in range(n):
+				u = i + j
+				v = i - j + n
+				if 0 <= u < size and 0 <= v < size:
+					ans[i][j] = acc1[u][v] + acc2[u][v]
+
+		return ans
+
 # TODO
     # @staticmethod
     # def diff_of_diff(n: int) -> Tuple[
