@@ -186,6 +186,36 @@ class DiffArray:
         return xs, prefix
 
 
+"""
+#3: 二维差分(矩阵实现)
+https://github.com/xile42/codeforces-python/blob/main/templates/diff_array.py
+"""
+class DiffArray2D:
+
+	@staticmethod
+	def diff_accumulate(m: int, n: int, operations: List[Tuple[int, int, int, int, int]]) -> List[List[int]]:
+
+		diff = [[0] * (n + 2) for _ in range(m + 2)]
+
+		for x1, y1, x2, y2, w in operations:
+			diff[x1][y1] += w
+			diff[x1][y2 + 1] -= w
+			diff[x2 + 1][y1] -= w
+			diff[x2 + 1][y2 + 1] += w
+
+		ans = [[0] * n for _ in range(m)]
+		ans[0][0] = diff[0][0]
+		for j in range(1, n):
+			ans[0][j] = ans[0][j - 1] + diff[0][j]
+		for i in range(1, m):
+			ans[i][0] = ans[i - 1][0] + diff[i][0]
+
+		for i in range(1, m):
+			for j in range(1, n):
+				ans[i][j] = (ans[i - 1][j] + ans[i][j - 1] - ans[i - 1][j - 1] + diff[i][j])
+
+		return ans
+
 # TODO
     # @staticmethod
     # def diff_of_diff(n: int) -> Tuple[
